@@ -1,62 +1,40 @@
 import streamlit as st
 import pandas as pd
 
-st.set_page_config(
-    page_title="Carnes VIP | Premium Meat House",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)
+st.set_page_config(page_title="Carnes VIP", layout="wide")
 
 # =========================
-# ESTILO PRO
+# ESTILO PREMIUM
 # =========================
 st.markdown("""
 <style>
-
-body {
-    background-color: #0f0f0f;
-}
 
 .main {
     background-color: #f4f4f4;
 }
 
-/* HERO */
+/* HEADER */
 .hero {
-    background: linear-gradient(90deg, #8B0000, #C62828);
-    padding: 40px;
-    border-radius: 20px;
+    background: linear-gradient(90deg, #7f0000, #c62828);
+    padding: 35px;
+    border-radius: 18px;
     color: white;
-    text-align: left;
-    margin-bottom: 20px;
 }
 
-/* CARD PRODUCTO */
+/* PRODUCT CARD */
 .card {
     background: white;
-    padding: 18px;
     border-radius: 16px;
-    box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
-    margin-bottom: 12px;
-    border-left: 6px solid #C62828;
+    padding: 15px;
+    box-shadow: 0px 3px 10px rgba(0,0,0,0.08);
+    margin-bottom: 15px;
 }
 
-/* BADGE */
-.badge {
-    background: #C62828;
+/* BOTÓN */
+.stButton>button {
+    background-color: #c62828;
     color: white;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-}
-
-/* BOTÓN CONTACTO */
-.contact-box {
-    background: #111;
-    color: white;
-    padding: 20px;
-    border-radius: 15px;
-    text-align: center;
+    border-radius: 10px;
 }
 
 </style>
@@ -68,96 +46,135 @@ body {
 st.markdown("""
 <div class="hero">
     <h1>🥩 Carnes VIP</h1>
-    <h3>Calidad Premium en Peñalolén</h3>
-    <p>Bolívar 6618 | Corte seleccionado | Atención personalizada | Parrilla & hogar</p>
+    <p>Premium Meat House | Peñalolén - Bolívar 6618</p>
+    <p>🥩 Cortes seleccionados | 🚚 Delivery | 🔥 Parrilla & hogar</p>
 </div>
 """, unsafe_allow_html=True)
 
-# =========================
-# KPIs VISUALES
-# =========================
-col1, col2, col3 = st.columns(3)
-
-col1.metric("🔥 Cortes Premium", "25+")
-col2.metric("🚚 Delivery", "30–60 min")
-col3.metric("⭐ Satisfacción", "4.9/5")
-
 st.divider()
 
 # =========================
-# BASE PRODUCTOS
+# CATALOGO REAL CON IMAGENES
 # =========================
-productos = pd.DataFrame([
-    ["Lomo Vetado", "Vacuno", 12990, "🔥 Parrilla premium"],
-    ["Filete", "Vacuno", 15990, "🥩 Corte suave y fino"],
-    ["Asado Carnicero", "Vacuno", 8990, "🍖 Tradicional"],
-    ["Costillar Cerdo", "Cerdo", 6990, "🍖 Jugoso"],
-    ["Pechuga Pollo", "Pollo", 4990, "💪 Alta proteína"],
-    ["Chorizos Artesanales", "Embutidos", 5990, "⭐ Especial parrilla"]
-], columns=["Producto", "Categoria", "Precio", "Descripcion"])
+productos = [
+    {
+        "nombre": "Lomo Vetado",
+        "precio": 12990,
+        "categoria": "Vacuno",
+        "img": "https://images.unsplash.com/photo-1600891964599-f61ba0e24092"
+    },
+    {
+        "nombre": "Filete Premium",
+        "precio": 15990,
+        "categoria": "Vacuno",
+        "img": "https://images.unsplash.com/photo-1603360946369-dc9bb6258143"
+    },
+    {
+        "nombre": "Asado Carnicero",
+        "precio": 8990,
+        "categoria": "Vacuno",
+        "img": "https://images.unsplash.com/photo-1551028150-64b9f398f678"
+    },
+    {
+        "nombre": "Costillar de Cerdo",
+        "precio": 6990,
+        "categoria": "Cerdo",
+        "img": "https://images.unsplash.com/photo-1604908176997-125f25cc500f"
+    },
+    {
+        "nombre": "Chorizos Artesanales",
+        "precio": 5990,
+        "categoria": "Embutidos",
+        "img": "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f"
+    }
+]
 
 # =========================
-# FILTRO INTELIGENTE
+# CARRITO
 # =========================
-categoria = st.selectbox(
-    "🔎 Explorar catálogo",
-    ["Todos"] + list(productos["Categoria"].unique())
-)
-
-if categoria != "Todos":
-    productos = productos[productos["Categoria"] == categoria]
+if "cart" not in st.session_state:
+    st.session_state.cart = []
 
 # =========================
-# CATÁLOGO CON ACORDEÓN (LOOK PRO)
+# FUNCION AGREGAR
+# =========================
+def add_to_cart(producto):
+    st.session_state.cart.append(producto)
+
+# =========================
+# FILTRO
+# =========================
+categorias = ["Todos"] + list(set([p["categoria"] for p in productos]))
+cat = st.selectbox("🔎 Filtrar catálogo", categorias)
+
+# =========================
+# GRID DE PRODUCTOS
 # =========================
 st.markdown("## 🥩 Catálogo Premium")
 
-for cat in productos["Categoria"].unique():
+for p in productos:
+    if cat != "Todos" and p["categoria"] != cat:
+        continue
 
-    with st.expander(f"📦 {cat}"):
-        sub = productos[productos["Categoria"] == cat]
+    col1, col2 = st.columns([1, 2])
 
-        for _, row in sub.iterrows():
-            st.markdown(f"""
-            <div class="card">
-                <h3>{row['Producto']} <span class="badge">{row['Categoria']}</span></h3>
-                <p>{row['Descripcion']}</p>
-                <h4 style="color:#C62828;">${row['Precio']:,} / kg</h4>
-            </div>
-            """, unsafe_allow_html=True)
+    with col1:
+        st.image(p["img"], use_container_width=True)
 
-# =========================
-# PROMO ESTILO MARKETING
-# =========================
+    with col2:
+        st.markdown(f"### {p['nombre']}")
+        st.write(f"Categoria: {p['categoria']}")
+        st.markdown(f"## 💰 ${p['precio']:,} / kg")
+
+        if st.button(f"Agregar {p['nombre']} 🛒"):
+            add_to_cart(p)
+            st.success("Agregado al carrito")
+
 st.divider()
 
-st.markdown("## 🔥 Oferta del Día")
+# =========================
+# CARRITO REAL
+# =========================
+st.markdown("## 🛒 Carrito de compras")
 
-st.warning("""
-🥩 PACK PARRILLERO VIP  
-- 1kg Lomo Vetado  
-- 1kg Asado Carnicero  
-- 6 Chorizos Artesanales  
+if len(st.session_state.cart) == 0:
+    st.info("Tu carrito está vacío")
+else:
+    total = 0
 
-💥 25% DESCUENTO HOY
-""")
+    for i, item in enumerate(st.session_state.cart):
+        st.write(f"- {item['nombre']} | ${item['precio']:,}")
+        total += item["precio"]
+
+    st.markdown(f"### 💰 Total: ${total:,}")
+
+    # =========================
+    # WHATSAPP ORDER
+    # =========================
+    mensaje = "Pedido Carnes VIP:%0A"
+
+    for item in st.session_state.cart:
+        mensaje += f"- {item['nombre']} ${item['precio']}%0A"
+
+    mensaje += f"%0ATotal: ${total}"
+
+    whatsapp_url = f"https://wa.me/569XXXXXXXX?text={mensaje}"
+
+    st.link_button("📲 Enviar pedido por WhatsApp", whatsapp_url)
+
+    if st.button("🗑️ Vaciar carrito"):
+        st.session_state.cart = []
+        st.rerun()
 
 # =========================
-# CONTACTO PRO
+# CONTACTO
 # =========================
 st.divider()
 
 st.markdown("""
-<div class="contact-box">
-    <h2>📲 Contacto & Pedidos</h2>
-    <p>📍 Bolívar 6618, Peñalolén</p>
-    <p>📞 WhatsApp: +56 9 XXXX XXXX</p>
-    <p>🚚 Delivery disponible</p>
-</div>
-""", unsafe_allow_html=True)
-
-# BOTÓN WHATSAPP (SIMULADO)
-st.link_button(
-    "💬 Pedir por WhatsApp",
-    "https://wa.me/569XXXXXXXX"
-)
+### 📍 Carnes VIP
+📌 Bolívar 6618, Peñalolén  
+📲 WhatsApp pedidos directos  
+🚚 Delivery rápido  
+🔥 Especialistas en parrilla
+""")
