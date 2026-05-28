@@ -1,86 +1,163 @@
 import streamlit as st
 import pandas as pd
 
-st.set_page_config(page_title="Carnes VIP", layout="wide")
+st.set_page_config(
+    page_title="Carnes VIP | Premium Meat House",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 
 # =========================
-# ESTILO
+# ESTILO PRO
 # =========================
 st.markdown("""
 <style>
+
+body {
+    background-color: #0f0f0f;
+}
+
 .main {
-    background-color: #f5f5f5;
+    background-color: #f4f4f4;
 }
 
+/* HERO */
+.hero {
+    background: linear-gradient(90deg, #8B0000, #C62828);
+    padding: 40px;
+    border-radius: 20px;
+    color: white;
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+/* CARD PRODUCTO */
 .card {
-    background-color: white;
-    padding: 15px;
-    border-radius: 15px;
-    box-shadow: 0px 2px 8px rgba(0,0,0,0.1);
-    margin-bottom: 15px;
+    background: white;
+    padding: 18px;
+    border-radius: 16px;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
+    margin-bottom: 12px;
+    border-left: 6px solid #C62828;
 }
 
-.title {
-    font-size: 40px;
-    font-weight: bold;
-    color: #b71c1c;
+/* BADGE */
+.badge {
+    background: #C62828;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
 }
+
+/* BOTÓN CONTACTO */
+.contact-box {
+    background: #111;
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
+}
+
 </style>
 """, unsafe_allow_html=True)
 
 # =========================
-# HEADER
+# HERO
 # =========================
-st.markdown("<div class='title'>🥩 Carnes VIP</div>", unsafe_allow_html=True)
-st.subheader("Calidad Premium en Peñalolén | Bolívar 6618")
+st.markdown("""
+<div class="hero">
+    <h1>🥩 Carnes VIP</h1>
+    <h3>Calidad Premium en Peñalolén</h3>
+    <p>Bolívar 6618 | Corte seleccionado | Atención personalizada | Parrilla & hogar</p>
+</div>
+""", unsafe_allow_html=True)
 
-st.markdown("📍 Delivery y retiro en tienda | 📲 WhatsApp pedidos")
+# =========================
+# KPIs VISUALES
+# =========================
+col1, col2, col3 = st.columns(3)
+
+col1.metric("🔥 Cortes Premium", "25+")
+col2.metric("🚚 Delivery", "30–60 min")
+col3.metric("⭐ Satisfacción", "4.9/5")
 
 st.divider()
 
 # =========================
-# DATA PRODUCTOS
+# BASE PRODUCTOS
 # =========================
 productos = pd.DataFrame([
-    ["Lomo Vetado", "Vacuno", 12990, "Premium para parrilla 🔥"],
-    ["Asado Carnicero", "Vacuno", 8990, "Ideal para fines de semana"],
-    ["Costillar Cerdo", "Cerdo", 6990, "Jugoso y tierno"],
-    ["Pechuga Pollo", "Pollo", 4990, "Alta proteína"],
-    ["Chorizos Artesanales", "Embutidos", 5990, "Para parrilla ⭐"]
+    ["Lomo Vetado", "Vacuno", 12990, "🔥 Parrilla premium"],
+    ["Filete", "Vacuno", 15990, "🥩 Corte suave y fino"],
+    ["Asado Carnicero", "Vacuno", 8990, "🍖 Tradicional"],
+    ["Costillar Cerdo", "Cerdo", 6990, "🍖 Jugoso"],
+    ["Pechuga Pollo", "Pollo", 4990, "💪 Alta proteína"],
+    ["Chorizos Artesanales", "Embutidos", 5990, "⭐ Especial parrilla"]
 ], columns=["Producto", "Categoria", "Precio", "Descripcion"])
 
 # =========================
-# FILTRO
+# FILTRO INTELIGENTE
 # =========================
-categoria = st.selectbox("Filtrar categoría", ["Todos"] + list(productos["Categoria"].unique()))
+categoria = st.selectbox(
+    "🔎 Explorar catálogo",
+    ["Todos"] + list(productos["Categoria"].unique())
+)
 
 if categoria != "Todos":
     productos = productos[productos["Categoria"] == categoria]
 
 # =========================
-# CATALOGO
+# CATÁLOGO CON ACORDEÓN (LOOK PRO)
 # =========================
-st.markdown("## 🥩 Catálogo")
+st.markdown("## 🥩 Catálogo Premium")
 
-for _, row in productos.iterrows():
-    st.markdown(f"""
-    <div class="card">
-        <h3>{row['Producto']}</h3>
-        <p>{row['Descripcion']}</p>
-        <h4 style="color:#b71c1c;">${row['Precio']:,} / kg</h4>
-    </div>
-    """, unsafe_allow_html=True)
+for cat in productos["Categoria"].unique():
+
+    with st.expander(f"📦 {cat}"):
+        sub = productos[productos["Categoria"] == cat]
+
+        for _, row in sub.iterrows():
+            st.markdown(f"""
+            <div class="card">
+                <h3>{row['Producto']} <span class="badge">{row['Categoria']}</span></h3>
+                <p>{row['Descripcion']}</p>
+                <h4 style="color:#C62828;">${row['Precio']:,} / kg</h4>
+            </div>
+            """, unsafe_allow_html=True)
 
 # =========================
-# PROMO
+# PROMO ESTILO MARKETING
 # =========================
 st.divider()
-st.markdown("## 🔥 Promoción del día")
-st.success("Pack Parrillero Familiar: 1kg Lomo Vetado + 1kg Costillar + 6 Chorizos = 25% OFF")
+
+st.markdown("## 🔥 Oferta del Día")
+
+st.warning("""
+🥩 PACK PARRILLERO VIP  
+- 1kg Lomo Vetado  
+- 1kg Asado Carnicero  
+- 6 Chorizos Artesanales  
+
+💥 25% DESCUENTO HOY
+""")
 
 # =========================
-# UBICACION
+# CONTACTO PRO
 # =========================
 st.divider()
-st.markdown("## 📍 Ubicación")
-st.info("Bolívar 6618, Peñalolén, Santiago")
+
+st.markdown("""
+<div class="contact-box">
+    <h2>📲 Contacto & Pedidos</h2>
+    <p>📍 Bolívar 6618, Peñalolén</p>
+    <p>📞 WhatsApp: +56 9 XXXX XXXX</p>
+    <p>🚚 Delivery disponible</p>
+</div>
+""", unsafe_allow_html=True)
+
+# BOTÓN WHATSAPP (SIMULADO)
+st.link_button(
+    "💬 Pedir por WhatsApp",
+    "https://wa.me/569XXXXXXXX"
+)
