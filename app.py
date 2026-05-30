@@ -10,136 +10,14 @@ st.set_page_config(
 WHATSAPP = "56981919691"
 
 # =========================
-# ESTILO REAL ECOMMERCE
-# =========================
-
-st.markdown("""
-<style>
-
-.main {
-    background:#0b0b0b;
-}
-
-.block-container {
-    padding-top: 1rem;
-}
-
-/* HEADER REAL NEGOCIO */
-.hero {
-    background: linear-gradient(135deg, #000000, #1a1a1a);
-    border-bottom: 1px solid #c9a227;
-    padding: 45px;
-    text-align: center;
-    color: #f5f0e6;
-}
-
-.hero h1 {
-    font-size: 46px;
-    letter-spacing: 4px;
-    margin: 0;
-}
-
-.hero p {
-    color:#c9a227;
-    margin: 5px;
-}
-
-/* GRID PRODUCTOS */
-.grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 18px;
-}
-
-/* CARD REAL */
-.card {
-    background:#141414;
-    border:1px solid #2a2a2a;
-    border-radius:14px;
-    overflow:hidden;
-    transition:0.2s;
-}
-
-.card:hover {
-    transform: scale(1.02);
-}
-
-/* IMAGEN PRO REAL (IMPORTANTE) */
-.card img {
-    width: 100%;
-    height: 220px;
-    object-fit: cover;
-}
-
-/* TEXTO */
-.card-body {
-    padding: 12px;
-}
-
-.title {
-    color:#f5f0e6;
-    font-size:18px;
-    font-weight:600;
-}
-
-.price {
-    color:#c9a227;
-    font-size:20px;
-    font-weight:700;
-    margin-top:5px;
-}
-
-/* BOTONES */
-.stButton > button {
-    width:100%;
-    background:#c9a227;
-    color:black;
-    font-weight:bold;
-    border-radius:10px;
-    border:none;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
-# =========================
-# HEADER
-# =========================
-
-st.markdown("""
-<div class="hero">
-    <h1>🥩 CARNES VIP</h1>
-    <p>Premium Butchery • Cortes Seleccionados</p>
-    <p>📍 Peñalolén • Santiago</p>
-    <p>🔥 Parrilla · 🚚 Delivery · 🥩 Calidad Premium</p>
-</div>
-""", unsafe_allow_html=True)
-
-# =========================
-# PRODUCTOS (IMAGENES FIXED REAL LOOK)
+# DATA (MEJOR IMAGEN CONSISTENTE)
 # =========================
 
 productos = [
-    {
-        "nombre": "Lomo Vetado",
-        "precio": 12990,
-        "img": "https://images.unsplash.com/photo-1604908176997-125f25cc500f?auto=format&fit=crop&w=900&q=80"
-    },
-    {
-        "nombre": "Asado Carnicero",
-        "precio": 8990,
-        "img": "https://images.unsplash.com/photo-1603048297172-c92544798d5a?auto=format&fit=crop&w=900&q=80"
-    },
-    {
-        "nombre": "Filete Premium",
-        "precio": 15990,
-        "img": "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?auto=format&fit=crop&w=900&q=80"
-    },
-    {
-        "nombre": "Costillar de Cerdo",
-        "precio": 6990,
-        "img": "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?auto=format&fit=crop&w=900&q=80"
-    },
+    ("Lomo Vetado", 12990, "https://images.unsplash.com/photo-1604908176997-125f25cc500f?auto=format&fit=crop&w=800&q=80"),
+    ("Filete Premium", 15990, "https://images.unsplash.com/photo-1603360946369-dc9bb6258143?auto=format&fit=crop&w=800&q=80"),
+    ("Asado Carnicero", 8990, "https://images.unsplash.com/photo-1603048297172-c92544798d5a?auto=format&fit=crop&w=800&q=80"),
+    ("Costillar Cerdo", 6990, "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?auto=format&fit=crop&w=800&q=80"),
 ]
 
 # =========================
@@ -149,48 +27,40 @@ productos = [
 if "cart" not in st.session_state:
     st.session_state.cart = []
 
-def add(p, qty):
+def add(name, price, qty):
     for i in st.session_state.cart:
-        if i["nombre"] == p["nombre"]:
+        if i["name"] == name:
             i["qty"] += qty
             return
     st.session_state.cart.append({
-        "nombre": p["nombre"],
-        "precio": p["precio"],
+        "name": name,
+        "price": price,
         "qty": qty
     })
 
 # =========================
-# TITLE
+# HEADER REAL (SIN LOOK DEMO)
 # =========================
 
-st.markdown("## 🥩 Productos")
+st.title("🥩 Carnes VIP")
+st.caption("Premium Butchery · Cortes seleccionados en Santiago")
+
+st.divider()
 
 # =========================
-# GRID REAL (STREAMLIT SAFE)
+# GRID LIMPIO (SIN HTML)
 # =========================
 
-cols = st.columns(3)
+cols = st.columns(4)
 
-for i, p in enumerate(productos):
+for i, (name, price, img) in enumerate(productos):
 
-    with cols[i % 3]:
+    with cols[i % 4]:
 
-        st.markdown(f"""
-        <div class="card">
+        st.image(img, use_container_width=True)
 
-            <img src="{p['img']}">
-
-            <div class="card-body">
-
-                <div class="title">{p['nombre']}</div>
-
-                <div class="price">${p['precio']:,}/kg</div>
-
-            </div>
-
-        </div>
-        """, unsafe_allow_html=True)
+        st.subheader(name)
+        st.write(f"💰 ${price:,}/kg")
 
         qty = st.number_input(
             "Kg",
@@ -199,40 +69,40 @@ for i, p in enumerate(productos):
         )
 
         if st.button("Agregar", key=f"b{i}"):
-            add(p, qty)
+            add(name, price, qty)
             st.toast("Agregado")
 
 # =========================
-# SIDEBAR
+# SIDEBAR (PRO REAL)
 # =========================
 
-st.sidebar.title("🛒 Pedido VIP")
+st.sidebar.title("🛒 Pedido")
 
-nombre = st.sidebar.text_input("Nombre")
-telefono = st.sidebar.text_input("Teléfono")
-direccion = st.sidebar.text_input("Dirección")
+name = st.sidebar.text_input("Nombre")
+phone = st.sidebar.text_input("Teléfono")
+address = st.sidebar.text_input("Dirección")
 
 total = 0
 msg = "🥩 CARNES VIP\n\n"
 
-for item in st.session_state.cart:
+if st.session_state.cart:
 
-    sub = item["precio"] * item["qty"]
-    total += sub
+    for item in st.session_state.cart:
 
-    st.sidebar.write(f"{item['nombre']} x{item['qty']} = ${sub:,}")
+        sub = item["price"] * item["qty"]
+        total += sub
 
-    msg += f"{item['nombre']} x{item['qty']} = ${sub}\n"
+        st.sidebar.write(f"{item['name']} x{item['qty']} = ${sub:,}")
 
-msg += f"\nTOTAL: ${total}"
+        msg += f"{item['name']} x{item['qty']} = ${sub}\n"
 
+msg += f"\nTOTAL: ${total:,}"
+
+st.sidebar.divider()
 st.sidebar.markdown(f"## TOTAL: ${total:,}")
 
 if st.session_state.cart:
 
     url = f"https://wa.me/{WHATSAPP}?text={quote(msg)}"
 
-    st.sidebar.link_button(
-        "📲 Enviar pedido",
-        url
-    )
+    st.sidebar.link_button("📲 Enviar pedido", url)
