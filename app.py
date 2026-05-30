@@ -1,61 +1,60 @@
 import streamlit as st
-import pandas as pd
+from urllib.parse import quote
 
-st.set_page_config(page_title="Carnes VIP", layout="wide")
+st.set_page_config(
+    page_title="Carnes VIP",
+    page_icon="🥩",
+    layout="wide"
+)
 
-# =========================
-# ESTILO PREMIUM
-# =========================
+# ==========================================
+# ESTILOS
+# ==========================================
+
 st.markdown("""
 <style>
 
 .main {
-    background-color: #f4f4f4;
+    background-color: #f7f7f7;
 }
 
-/* HEADER */
 .hero {
-    background: linear-gradient(90deg, #7f0000, #c62828);
-    padding: 35px;
-    border-radius: 18px;
-    color: white;
+    background: linear-gradient(135deg,#111,#8B0000);
+    color:white;
+    padding:30px;
+    border-radius:20px;
+    text-align:center;
+    margin-bottom:20px;
 }
 
-/* PRODUCT CARD */
-.card {
-    background: white;
-    border-radius: 16px;
-    padding: 15px;
-    box-shadow: 0px 3px 10px rgba(0,0,0,0.08);
-    margin-bottom: 15px;
+.product-card {
+    background:white;
+    padding:15px;
+    border-radius:15px;
+    box-shadow:0px 3px 12px rgba(0,0,0,0.1);
+    margin-bottom:15px;
 }
 
-/* BOTÓN */
-.stButton>button {
-    background-color: #c62828;
-    color: white;
-    border-radius: 10px;
+.stButton > button {
+    width:100%;
+    background:#c62828;
+    color:white;
+    border:none;
+    border-radius:10px;
+}
+
+.stButton > button:hover {
+    background:#8B0000;
+    color:white;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
-# =========================
-# HERO
-# =========================
-st.markdown("""
-<div class="hero">
-    <h1>🥩 Carnes VIP</h1>
-    <p>Premium Meat House | Peñalolén - Bolívar 6618</p>
-    <p>🥩 Cortes seleccionados | 🚚 Delivery | 🔥 Parrilla & hogar</p>
-</div>
-""", unsafe_allow_html=True)
+# ==========================================
+# DATOS
+# ==========================================
 
-st.divider()
-
-# =========================
-# CATALOGO REAL CON IMAGENES
-# =========================
 productos = [
     {
         "nombre": "Lomo Vetado",
@@ -89,92 +88,230 @@ productos = [
     }
 ]
 
-# =========================
-# CARRITO
-# =========================
+# ==========================================
+# SESSION
+# ==========================================
+
 if "cart" not in st.session_state:
     st.session_state.cart = []
 
-# =========================
-# FUNCION AGREGAR
-# =========================
-def add_to_cart(producto):
-    st.session_state.cart.append(producto)
+# ==========================================
+# FUNCIONES
+# ==========================================
 
-# =========================
-# FILTRO
-# =========================
-categorias = ["Todos"] + list(set([p["categoria"] for p in productos]))
-cat = st.selectbox("🔎 Filtrar catálogo", categorias)
+def agregar_carrito(producto, cantidad):
+    st.session_state.cart.append({
+        "nombre": producto["nombre"],
+        "precio": producto["precio"],
+        "cantidad": cantidad
+    })
 
-# =========================
-# GRID DE PRODUCTOS
-# =========================
-st.markdown("## 🥩 Catálogo Premium")
+# ==========================================
+# HERO
+# ==========================================
 
-for p in productos:
-    if cat != "Todos" and p["categoria"] != cat:
-        continue
+st.markdown("""
+<div class="hero">
+    <h1>🥩 Carnes VIP</h1>
+    <h4>Premium Meat House</h4>
+    <p>📍 Bolívar 6618, Peñalolén</p>
+    <p>🚚 Delivery • 🔥 Parrilla • 🥩 Cortes Premium</p>
+</div>
+""", unsafe_allow_html=True)
 
-    col1, col2 = st.columns([1, 2])
+# ==========================================
+# OFERTAS
+# ==========================================
 
-    with col1:
-        st.image(p["img"], use_container_width=True)
+st.info(
+    "🔥 PROMOCIÓN: Delivery gratis sobre $50.000 | "
+    "🥩 Cortes Premium seleccionados"
+)
 
-    with col2:
-        st.markdown(f"### {p['nombre']}")
-        st.write(f"Categoria: {p['categoria']}")
-        st.markdown(f"## 💰 ${p['precio']:,} / kg")
+# ==========================================
+# FILTROS
+# ==========================================
 
-        if st.button(f"Agregar {p['nombre']} 🛒"):
-            add_to_cart(p)
-            st.success("Agregado al carrito")
+col1, col2 = st.columns([1,1])
 
-st.divider()
+with col1:
+    busqueda = st.text_input("🔎 Buscar producto")
 
-# =========================
-# CARRITO REAL
-# =========================
-st.markdown("## 🛒 Carrito de compras")
+with col2:
+    categorias = ["Todos"] + list(set(
+        [p["categoria"] for p in productos]
+    ))
 
-if len(st.session_state.cart) == 0:
-    st.info("Tu carrito está vacío")
-else:
+    categoria = st.selectbox(
+        "Filtrar categoría",
+        categorias
+    )
+
+# ==========================================
+# CATÁLOGO
+# ==========================================
+
+st.subheader("🥩 Catálogo")
+
+cols = st.columns(3)
+
+indice = 0
+
+for producto in productos:
+
+    if categoria != "Todos":
+        if producto["categoria"] != categoria:
+            continue
+
+    if busqueda:
+        if busqueda.lower() not in producto["nombre"].lower():
+            continue
+
+    with cols[indice % 3]:
+
+        with st.container(border=True):
+
+            st.image(
+                producto["img"],
+                width=250
+            )
+
+            st.markdown(
+                f"### {producto['nombre']}"
+            )
+
+            st.caption(producto["categoria"])
+
+            st.metric(
+                "Precio por Kg",
+                f"${producto['precio']:,}"
+            )
+
+            cantidad = st.number_input(
+                "Cantidad (Kg)",
+                min_value=1,
+                value=1,
+                key=f"cantidad_{indice}"
+            )
+
+            if st.button(
+                "🛒 Agregar",
+                key=f"agregar_{indice}"
+            ):
+                agregar_carrito(producto, cantidad)
+                st.success("Producto agregado")
+
+    indice += 1
+
+# ==========================================
+# SIDEBAR CARRITO
+# ==========================================
+
+with st.sidebar:
+
+    st.header("🛒 Carrito")
+
     total = 0
 
-    for i, item in enumerate(st.session_state.cart):
-        st.write(f"- {item['nombre']} | ${item['precio']:,}")
-        total += item["precio"]
+    if len(st.session_state.cart) == 0:
 
-    st.markdown(f"### 💰 Total: ${total:,}")
+        st.info("No hay productos")
 
-    # =========================
-    # WHATSAPP ORDER
-    # =========================
-    mensaje = "Pedido Carnes VIP:%0A"
+    else:
 
-    for item in st.session_state.cart:
-        mensaje += f"- {item['nombre']} ${item['precio']}%0A"
+        mensaje = "🥩 PEDIDO CARNES VIP\n\n"
 
-    mensaje += f"%0ATotal: ${total}"
+        for item in st.session_state.cart:
 
-    whatsapp_url = f"https://wa.me/569XXXXXXXX?text={mensaje}"
+            subtotal = (
+                item["precio"] *
+                item["cantidad"]
+            )
 
-    st.link_button("📲 Enviar pedido por WhatsApp", whatsapp_url)
+            total += subtotal
 
-    if st.button("🗑️ Vaciar carrito"):
-        st.session_state.cart = []
-        st.rerun()
+            st.write(
+                f"**{item['nombre']}**"
+            )
 
-# =========================
-# CONTACTO
-# =========================
+            st.write(
+                f"{item['cantidad']} Kg"
+            )
+
+            st.write(
+                f"${subtotal:,}"
+            )
+
+            st.divider()
+
+            mensaje += (
+                f"• {item['nombre']}\n"
+                f"Cantidad: {item['cantidad']} Kg\n"
+                f"Subtotal: ${subtotal:,}\n\n"
+            )
+
+        mensaje += f"💰 TOTAL: ${total:,}"
+
+        st.markdown(
+            f"## Total: ${total:,}"
+        )
+
+        whatsapp = (
+            "https://wa.me/56971791270"
+            f"?text={quote(mensaje)}"
+        )
+
+        st.link_button(
+            "📲 Enviar pedido por WhatsApp",
+            whatsapp
+        )
+
+        if st.button("🗑️ Vaciar carrito"):
+            st.session_state.cart = []
+            st.rerun()
+
+# ==========================================
+# BOTON FLOTANTE WHATSAPP
+# ==========================================
+
+st.markdown("""
+<a href="https://wa.me/56971791270"
+target="_blank"
+style="
+position:fixed;
+bottom:20px;
+right:20px;
+background:#25D366;
+color:white;
+width:65px;
+height:65px;
+display:flex;
+align-items:center;
+justify-content:center;
+border-radius:50%;
+font-size:30px;
+text-decoration:none;
+z-index:9999;
+box-shadow:0 4px 15px rgba(0,0,0,0.3);
+">
+💬
+</a>
+""", unsafe_allow_html=True)
+
+# ==========================================
+# FOOTER
+# ==========================================
+
 st.divider()
 
 st.markdown("""
 ### 📍 Carnes VIP
-📌 Bolívar 6618, Peñalolén  
-📲 WhatsApp pedidos directos  
-🚚 Delivery rápido  
+
+📌 Bolívar 6618, Peñalolén
+
+📲 Pedidos por WhatsApp
+
+🚚 Delivery rápido
+
 🔥 Especialistas en parrilla
 """)
