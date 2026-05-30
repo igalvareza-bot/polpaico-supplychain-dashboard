@@ -1,4 +1,3 @@
-```python
 import streamlit as st
 from urllib.parse import quote
 
@@ -465,4 +464,4 @@ st.markdown("""
 
 🔥 Especialistas en Parrilla
 """)
-```
+
